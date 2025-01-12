@@ -1,5 +1,5 @@
 #Image de base
-FROM wordpress:php7.4-fpm
+FROM mariadb:latest
 
 #Declaration des auteurs 
 LABEL LABEL maintainer="<votre_email>"
@@ -14,7 +14,7 @@ COPY ./nginx.conf /etc/nginx/nginx.conf
 
 
 #expose des ports pour acceder au conteneur
-EXPOSE 9000
+EXPOSE 3306
 
 #commande a executer lors de la construction : 
 CMD 
