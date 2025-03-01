@@ -1,8 +1,6 @@
 #Image de base
-FROM mariadb:latest
+FROM debian:bullseye
 
-#Declaration des auteurs 
-LABEL LABEL maintainer="<votre_email>"
 
 #Ajoute les dependances ou outils necessaires (commandes shell)
 RUN 

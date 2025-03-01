@@ -1,36 +1,46 @@
-#Image de base
-FROM alpine:3.21.2
+# Base de l'image
+FROM debian:bullseye                            
 
-#Ajoute les dependances ou outils necessaires (commandes shell)
-RUN apk update && apk upgrade && apk add --no-cache nginx
-RUN apk add --no-cache nginx openssl
+# Mise à jour, mise a niveau et installation des paquets nécessaires
+RUN apt update -y && apt upgrade -y
 
-#expose des ports pour acceder au conteneur
-EXPOSE 443
-RUN pwd
-#copie des fichiers et repetoires dans l'image construite
-COPY ./conf/nginx.conf /etc/nginx/http.d/nginx.conf
+# Installation des logiciels essentiels:
+    # Nginx (Serveur web)
+    # Vim (editeur de texte)
+    # Curl (outil de requetes HTTP)
+    # OpenSSL (gestion des certificats SSL/TLS)
+RUN apt-get install nginx -y
 
-#Modifie les droits en permettant la lecture et l'execution des fichiers de configuration
-RUN chmod -R 755 /etc/nginx/http.d/nginx.conf
+RUN apt-get install vim -y    
 
-#Creation d un repertoire pour stocker les certificats SSL utilises par NGINX
-RUN mkdir -p /etc/nginx/ssl
+RUN apt-get install curl -y
 
-#Generation de certificars SSL auto-signes
-    #genere un certificat auto-signe au format X.509 avec une cle privee qui ne sera pas chiffree avec un mot de passe
-    #out specifie le chemin ou sera sauvegardee le certificat
-    #keyout: specifie le chemin ou sera sauvegardee la clee privee
-    #subj : Fournit les informations necessaires pour generer le certificat
-RUN openssl req -x509 -nodes \ 
-    -out /etc/nginx/ssl/ssl_certif.crt \
-    -keyout /etc/nginx/ssl/ssl_key.key \
-    -subj "/C=FR/ST=IDF/L=Paris/O=School/OU=42Paris/CN=aceralin.42.fr"
+RUN apt-get install openssl -y
 
-#Modifier les permissions pour le repertoire web
-RUN chmod -R 755 /var/www/*
-#Change le proprietaire en nobody pour des raisons de securites ( utilisateur sans privilege)
-# RUN chmod -R 000 /var/www/
+# Creation du dossier SSL pour Nginx et Attribution des droits pour permettre l'acces aux fichiers
+RUN mkdir -p /etc/nginx/ssl && chmod -R 755 /etc/nginx/ssl
 
-#commande a executer lors de la construction : 
-CMD ["nginx", "-g","daemon off;"]
+# Generation du certificat SSL auto-signe valable 365 jours avec une cle RSA 2048 qui remplie automatiquement les informations du certificats
+# Utile pour activer le HPPTS dans le serveur Nginx 
+RUN openssl req \ 
+            -x509 \
+            -nodes \
+            -days 365 \
+            -newkey rsa:2048 \
+            -keyout /etc/nginx/ssl/inception.key \
+            -out /etc/nginx/ssl/inception.crt \
+            -subj '/C=FR/ST=Ile-de-France/L=Paris/O=42/OU=42Paris/CN=aceralin.42.fr/UID=aceralin'
+
+# Création du dossier nécessaire au bon fonctionnement de Nginx.
+RUN mkdir -p /var/run/nginx
+
+COPY ./conf/default /etc/nginx/sites-available/default
+
+# Ce fichier définit la manière dont Nginx va servir les requêtes
+# Si d'autres services interagissent avec ce dossier, 
+# ils peuvent lire et exécuter, mais pas modifier. 
+RUN chmod 755 /var/www/html
+
+# Lance le serveur web Nginx en mode "daemon off" pour qu'il s'exécute au premier plan
+# et ne se termine pas immédiatement après le démarrage du conteneur
+ENTRYPOINT ["nginx", "-g", "daemon off;"]

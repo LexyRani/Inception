@@ -1,20 +1,26 @@
-#Image de base
-FROM wordpress:php7.4-fpm
+FROM debian:bullseye
 
-#Declaration des auteurs 
-LABEL LABEL maintainer="<votre_email>"
+# Mise à jour et installation des dépendances PHP et MySQL :
+# Installation de PHP et des extensions nécessaires à WordPress.
+# Installation du client MySQL pour interagir avec MariaDB.
 
-#Ajoute les dependances ou outils necessaires (commandes shell)
-RUN 
+RUN apt update && apt upgrade -y 
+RUN apt-get install php curl wget php-mysqli php-fpm php-cgi php-curl php-gd php-mbstring php-xml php-xmlrpc php-soap php-intl php-zip -y
+RUN apt-get install default-mysql-client -y 
 
-#copie des fichiers ou repetoires dans l image
-COPY ./nginx.conf /etc/nginx/nginx.conf
+# Copie d’un fichier de configuration www.conf pour PHP-FPM (FastCGI Process Manager),
+# qui est utilisé pour exécuter les scripts PHP en arrière-plan.
+COPY ./conf/www.conf /etc/php/7.4/fpm/pool.d/
 
-#definit les variables d environnement
+RUN mkdir /run/php
+
+RUN apt-get install iputils-ping -y
+RUN apt-get install vim -y
 
 
-#expose des ports pour acceder au conteneur
+COPY tools/install.sh /home/
+RUN chmod 755 /home/install.sh
+
 EXPOSE 9000
 
-#commande a executer lors de la construction : 
-CMD 
+ENTRYPOINT ["/home/install.sh" ] 
