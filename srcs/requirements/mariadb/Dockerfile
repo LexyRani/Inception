@@ -1,18 +1,13 @@
-#Image de base
 FROM debian:bullseye
 
+RUN apt-get update -y && apt upgrade -y
 
-#Ajoute les dependances ou outils necessaires (commandes shell)
-RUN 
+RUN apt-get install -y mariadb-server
 
-#copie des fichiers ou repetoires dans l image
-COPY ./nginx.conf /etc/nginx/nginx.conf
+COPY /conf/50-server.cnf /etc/mysql/mariadb.conf.d/
 
-#definit les variables d environnement
+COPY tools/script.sh /
 
+RUN chmod +x /script.sh
 
-#expose des ports pour acceder au conteneur
-EXPOSE 3306
-
-#commande a executer lors de la construction : 
-CMD 
+ENTRYPOINT [ "/script.sh" ]

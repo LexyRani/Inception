@@ -1,15 +1,54 @@
-#variables
-DOCKER_COMPOSE = docker=compose
-DOCKER_COMPOSE_FILE = docker-compose.yml
-NAME = Inception
+all:
+	@sudo mkdir -p /home/aceralin/data/db /home/aceralin/data/wordpress
+	@docker-compose -f ./srcs/docker-compose.yml up --build -d
 
-all: ##Prepare les repertoires, puis lance l application avec les conteneurs definis
-build: ##Build les images dockers via docker-compose et relance les conteneurs
-	@echo "Building Docker images"
-	$(DOCKER_COMPOSE) -f $(DOCKER_COMPOSE_FILE) build
-down: ## Arreter et supprimer les conteneurs Docker
-re: ## stoppe les conteneurs et reconstruit les images et relance les services
-clean: ## Supprimer les conteneurs, les images inutiles et donnees locales
-fclean: # Supprime toutes les ressources Docker (conteneurs, images, reseaux  volumes et les donnees locales)
+install :
+	@sudo apt-get update 
+	@sudo apt-get upgrade -y
+	@sudo apt-get install -y curl gnupg ca-certificates lsb-release docker.io docker
+	@sudo mkdir -p /home/aceralin/data/db /home/aceralin/data/wordpress
+	
+reboot :
+	@sudo reboot
+	@sleep 60 # Wait for 60 seconds for the system to reboot
+	
+# Variables
+CONTAINERS = wordpress mariadb nginx
 
-.Phony : all build down re clean fclean
+pause:
+	@echo "Pause des conteneurs wordpress, mariadb et nginx..."
+	@docker pause $(CONTAINERS)
+
+unpause:
+	@echo "Relance des conteneurs wordpress, mariadb et nginx..."
+	@docker unpause $(CONTAINERS)
+
+restart:
+	@echo "Redémarrage des conteneurs wordpress, mariadb et nginx..."
+	@docker restart $(CONTAINERS)
+
+status:
+	@echo "Vérification du statut des conteneurs wordpress, mariadb et nginx..."
+	@docker ps --filter "name=wordpress" --filter "name=mariadb" --filter "name=nginx" --format "table {{.Names}}\t{{.Status}}"
+
+pause_and_restart:
+	@$(MAKE) pause
+	@sleep 2
+	@$(MAKE) unpause
+	@sleep 2
+	@$(MAKE) status
+	
+check_db:
+	@docker exec -it mariadb mysql -u root -p
+
+down:
+	@docker-compose -f ./srcs/docker-compose.yml down
+
+clean: down
+	@docker system prune -a
+	@docker volume rm -f $$(docker volume ls -q)
+	@sudo rm -rf /home/aceralin/data
+	#@docker network rm mynetwork
+
+
+.PHONY: all clean install restart down
