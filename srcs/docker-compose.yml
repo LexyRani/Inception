@@ -1,56 +1,65 @@
-Version: "3.9" #version du fichier docker Compose
+version: '3.3'
 
 services:
-    nginx:
-        container_name:  nginx              # Nom du container
-        build: requirements/nginx/          # Indique que l’image du conteneur sera construite à partir du Dockerfile situé dans requirements/nginx/
-        env_file: .env                      # Charge les variables d’environnement depuis le fichier .env.
-        ports:  "443:443"                   # Expose le port 443 (HTTPS).
-        networks: inception                 # Connecte ce service au réseau inception.
-        depends_on:                         # Assure que wordpress et mariadb démarrent avant nginx.
-            - wordpress
-            - mariadb
-        volumes:
-            - WordPressbis:/var/www/html    # WordPress partage son volume avec Nginx
-        restart: always                     # Redemarre le container en cas d arret
+  nginx:
+    container_name: nginx
+    volumes:
+      - WordPressbis:/var/www/html
+    networks:
+      - mynetwork
+    depends_on:
+      - wordpress
+      - mariadb
+    build: requirements/nginx/
+    env_file: .env
+    ports:
+      - "443:443"
+    restart: always
 
-    wordpress:
-        container_name:  wordpress
-        build: requirements/wordpress/
-        env_file: .env
-        expose: "9000"                      # Rend le port 9000 accessible aux autres conteneurs du réseau
-        ports: "9000:9000"                  # Associe le port 9000 du conteneur au port 9000 de la machine hôte.
-        depends_on: mariadb                 # Assure que mariadb démarre avant WordPress.
-        volume: WordPressbis:/var/www/html  # Lie le dossier contenant WordPress (WordPressbis) au répertoire /var/www/html dans le conteneur.
-        networks: inception
-        restart: always
+  mariadb:
+    container_name: mariadb
+    networks:
+      - mynetwork
+    build: requirements/mariadb/
+    env_file: .env
+    volumes:
+      - db:/var/lib/mysql
+    restart: always
 
-    mariadb:
-        container_name:  mariadb
-        build: requirements/mariadb/
-        env_file: .env
-        volume: db:/var/lib/mysql           # Sauvegarde les données de la base de données dans le volume db pour éviter la perte de données
-        networks: inception
-        restart: always
+  wordpress:
+    container_name: wordpress
+    env_file: .env
+    volumes:
+      - WordPressbis:/var/www/html
+    networks:
+      - mynetwork
+    build: requirements/wordpress/
+    depends_on:
+      - mariadb
+    restart: always
+    expose: 
+      - "9000"
+    ports:
+      - "9000:9000"
 
-networks :
-    mynetwork: 
-        name: inception
-        driver : bridge                     # Le réseau "bridge" est un réseau isolé qui permet aux conteneurs de se voir sans exposer leurs ports au monde extérieur
+
+networks:
+  mynetwork:
+    driver : bridge
 
 
-#db et WordPressbis sont les noms des volumes que Docker va creer pour la persistance des donnees
 volumes:
-    db:
-        driver: local                       # Docker utilise le driver local pour gérer ce volume.
-        driver_opts:                        # permet de définir des options avancées pour le volume.
-            type: 'none'                    # Spécifie que ce volume ne doit pas utiliser un système de fichiers spécial
-            o: 'bind'                       # Indique qu'il s'agit d'un bind mount, c'est-à-dire un simple lien entre un dossier de l'hôte et le conteneur.
-            device: '/home/aceralin/data/db' # Chemin du dossier sur l'hôte où les données de la base de données seront stockées.
+  db:
+    driver: local
+    driver_opts:
+      type: 'none' 
+      o: 'bind'
+      device: '/home/aceralin/data/db'
 
-    WordPressbis:
-        driver: local
-        driver_opts:
-            type: 'none'
-            o: 'bind'
-            device: '/home/aceralin/data/wordpress'
+  WordPressbis:
+    driver: local
+    driver_opts:
+      type: 'none'
+      o: 'bind'
+      device: '/home/aceralin/data/wordpress'
+

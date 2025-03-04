@@ -42,7 +42,7 @@ check_db:
 	@docker exec -it mariadb mysql -u root -p
 
 down:
-	@docker-compose -f ./srcs/docker-compose.yml down
+	@docker compose -f ./srcs/docker-compose.yml down
 
 clean: down
 	@docker system prune -a

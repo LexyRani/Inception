@@ -1,43 +1,30 @@
-# Ce fichier sert à configurer un serveur web qui héberge 
-# un site WordPress en utilisant PHP-FPM (FastCGI Process Manager) et TLS/SSL pour la sécurité.
-
-
-# Declaration du serveur ecoutant sur le port HTTPS
 server {
-        # Le serveur écoute sur le port 443 (port standard pour HTTPS)
-        # Le paramètre ssl active SSL/TLS pour sécuriser les connexions
         listen 443 ssl default_server;
         listen [::]:443 ssl default_server;
         
-        # Définit le nom de domaine du serveur et le nom du domaine au serveur
         server_name     aceralin.42.fr;
 
-        ssl_protocols	TLSv1.2 TLSv1.3;                        # Définit les versions de TLS autorisées
-        ssl_certificate /etc/nginx/ssl/inception.crt;           # Fichier contenant le certificat SSL pour sécuriser les connexions
-        ssl_certificate_key /etc/nginx/ssl/inception.key;       # Clé privée du certificat, nécessaire pour établir des connexions HTTPS
+        ssl_protocols	TLSv1.2 TLSv1.3;
+        ssl_certificate /etc/nginx/ssl/inception.crt;
+        ssl_certificate_key /etc/nginx/ssl/inception.key;
 
-        # Définition du dossier racine et du fichier index
-        root /var/www/html/wordpress;                           # Définit le répertoire racine du site web
-        index index.php ;                                       # Définit index.php comme page d'accueil (WordPress utilise PHP)
+        root /var/www/html/wordpress;
+        index index.php ;
 
-        # gestion des logs
-        access_log /var/log/nginx/wordpress.access_log;         # Stocke toutes les requêtes HTTP qui accèdent au site
-        error_log /var/log/nginx/wordpress.error_log;           # Stocke les erreurs Nginx 
+        access_log /var/log/nginx/wordpress.access_log;
+        error_log /var/log/nginx/wordpress.error_log;
 
-        # gestion des requetes HTTP qui definit la configuration pour la racine du site
-        # verifie si les fichiers demandes existe sinon renvoie une erreur 404
         location / {
                 try_files $uri $uri/ =404;
         }
 
-        # gestion des fichiers PHP avec FastCGI
-        location ~ \.php$ {                                     # Capture toutes les requêtes pour des fichiers .php
-                try_files $uri = 404;                           # Vérifie si le fichier .php existe, sinon renvoie une 404.
-                fastcgi_split_path_info ^(.+\.php)(/.+)$;       # Sépare la partie du fichier .php et les éventuels paramètres qui suivent
-                fastcgi_pass wordpress:9000;                    # Envoie les requêtes PHP au serveur PHP-FPM situé sur l'hôte wordpress 
-                fastcgi_index index.php;                        # Définit index.php comme fichier par défaut si un dossier est appelé
-                include fastcgi_params;                         # Charge des paramètres de configuration pour FastCGI
-                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name; # Définit le chemin absolu du script PHP exécuté
-                fastcgi_param PATH_INFO $fastcgi_path_info;     #Passe les informations de chemin à PHP pour une gestion correcte des routes
+        location ~ \.php$ {
+                try_files $uri = 404;
+                fastcgi_split_path_info ^(.+\.php)(/.+)$;
+                fastcgi_pass wordpress:9000;
+                fastcgi_index index.php;
+                include fastcgi_params;
+                fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+                fastcgi_param PATH_INFO $fastcgi_path_info;
         }
 }

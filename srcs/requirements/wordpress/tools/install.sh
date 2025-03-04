@@ -1,5 +1,4 @@
 #!/bin/sh
-
 FILE=wordpress
 cd /var/www/html
 
@@ -17,7 +16,7 @@ else
     wp core download --allow-root 
     
     sleep 5
-    wp config create --dbname=$MDB_NAME --dbuser=$MDB_USER --dbpass=$MDB_USER_PASSWORD --dbhost=$MDB_HOST --allow-root 
+    wp config create --dbname=$BDD_NAME --dbuser=$BDD_USER --dbpass=$BDD_USER_PASSWORD --dbhost=$BDD_HOST --allow-root 
     sleep 5
 
     wp core install --url=aceralin.42.fr --title=INCEPTION --admin_user=$WP_ADMIN_USER --admin_password=$WP_ADMIN_PASSWORD --admin_email=$WP_ADMIN_EMAIL --skip-email --allow-root  
@@ -26,10 +25,3 @@ else
 fi
 
 /usr/sbin/php-fpm7.4 -F
-
-
-# Vérifie si WordPress est déjà installé (évite les installations multiples)
-# Télécharge WP-CLI (outils en ligne de commande) pour gérer WordPress grace a curl -0 ""
-# Installe WordPress et configure la base de données
-# Crée un utilisateur administrateur et un utilisateur supplémentaire
-# Démarre PHP-FPM pour que WordPress puisse fonctionner
