@@ -3,8 +3,9 @@ all:
 	@docker-compose -f ./srcs/docker-compose.yml up --build -d
 
 install :
-	@sudo apt-get update 
+	@sudo apt-get update
 	@sudo apt-get upgrade -y
+	@sudo apt-get apt-utils
 	@sudo apt-get install -y curl gnupg ca-certificates lsb-release docker.io docker
 	@sudo mkdir -p /home/aceralin/data/db /home/aceralin/data/wordpress
 	
@@ -42,7 +43,7 @@ check_db:
 	@docker exec -it mariadb mysql -u root -p
 
 down:
-	@docker compose -f ./srcs/docker-compose.yml down
+	@docker-compose -f ./srcs/docker-compose.yml down
 
 clean: down
 	@docker system prune -a

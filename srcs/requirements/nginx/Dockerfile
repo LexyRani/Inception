@@ -21,19 +21,10 @@ RUN openssl req \
             -out /etc/nginx/ssl/inception.crt \
             -subj '/C=FR/ST=Ile-de-France/L=Paris/O=42/OU=42Paris/CN=aceralin.42.fr/UID=aceralin'
 
-# RUN echo "ssl_certificate /etc/ssl/certs/nginx-selfsigned.crt;\nssl_certificate_key /etc/ssl/private/nginx-selfsigned.key;" > /etc/nginx/snippets/self-signed.conf
-
-# RUN openssl dhparam -out /etc/nginx/dhparam.pem 2048
-# COPY ./conf/ssl-params.conf /etc/nginx/snippets/
-
-# COPY ./conf/default    /etc/nginx/sites-available/
-
-# RUN openssl req -x509 -nodes -out /etc/nginx/ssl/inception.crt -keyout /etc/nginx/ssl/inception.key -subj "/C=FR/ST=IDF/L=Paris/O=42/OU=42/CN=aceralin.42.fr/UID=aceralin"
 
 RUN mkdir -p /var/run/nginx
 
 COPY ./conf/default /etc/nginx/sites-available/default
-# COPY conf/nginx.conf /etc/nginx/nginx.conf
 
 RUN chmod 755 /var/www/html
 
