@@ -11,9 +11,8 @@ install :
 	
 reboot :
 	@sudo reboot
-	@sleep 60 # Wait for 60 seconds for the system to reboot
+	@sleep 60 
 	
-# Variables
 CONTAINERS = wordpress mariadb nginx
 
 pause:
@@ -47,9 +46,8 @@ down:
 
 clean: down
 	@docker system prune -a
-	@docker volume rm -f $$(docker volume ls -q)
 	@sudo rm -rf /home/aceralin/data
-	#@docker network rm mynetwork
+
 
 
 .PHONY: all clean install restart down
