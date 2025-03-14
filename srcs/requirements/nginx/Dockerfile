@@ -1,6 +1,6 @@
 FROM debian:bullseye
 
-RUN apt update -y && apt upgrade -y && apt install -y apt-utils
+RUN apt update -y && apt upgrade -y
 
 RUN apt-get install nginx -y
 
@@ -25,6 +25,7 @@ RUN openssl req \
 RUN mkdir -p /var/run/nginx
 
 COPY ./conf/default /etc/nginx/sites-available/default
+
 
 RUN chmod 755 /var/www/html
 

@@ -1,12 +1,13 @@
-version: '3.3'
+#version: '3.8'
 
 services:
   nginx:
     container_name: nginx
+    image: nginx
     volumes:
       - WordPressbis:/var/www/html
     networks:
-      - mynetwork
+      - inception
     depends_on:
       - wordpress
       - mariadb
@@ -18,8 +19,9 @@ services:
 
   mariadb:
     container_name: mariadb
+    image: mariadb
     networks:
-      - mynetwork
+      - inception
     build: requirements/mariadb/
     env_file: .env
     volumes:
@@ -28,11 +30,12 @@ services:
 
   wordpress:
     container_name: wordpress
+    image: wordpress
     env_file: .env
     volumes:
       - WordPressbis:/var/www/html
     networks:
-      - mynetwork
+      - inception
     build: requirements/wordpress/
     depends_on:
       - mariadb
@@ -44,7 +47,8 @@ services:
 
 
 networks:
-  mynetwork:
+  inception:
+    name : inception
     driver : bridge
 
 

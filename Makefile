@@ -3,16 +3,16 @@ all:
 	@docker-compose -f ./srcs/docker-compose.yml up --build -d
 
 install :
-	@sudo apt-get update
+	@sudo apt-get update 
 	@sudo apt-get upgrade -y
-	@sudo apt-get apt-utils
 	@sudo apt-get install -y curl gnupg ca-certificates lsb-release docker.io docker
 	@sudo mkdir -p /home/aceralin/data/db /home/aceralin/data/wordpress
 	
 reboot :
 	@sudo reboot
-	@sleep 60 
+	@sleep 60 # Wait for 60 seconds for the system to reboot
 	
+# Variables
 CONTAINERS = wordpress mariadb nginx
 
 pause:
@@ -46,8 +46,8 @@ down:
 
 clean: down
 	@docker system prune -a
+	@docker volume rm -f $$(docker volume ls -q)
 	@sudo rm -rf /home/aceralin/data
-
 
 
 .PHONY: all clean install restart down
